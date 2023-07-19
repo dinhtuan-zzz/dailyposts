@@ -1,14 +1,32 @@
-
 <%- include("partials/header"); -%>
-    <h1>Compose</h1>
-    <form class="" action="/compose" method="post">
-      <div class="form-group">
-        <label>Title</label>
-        <input class="form-control" type="text" name="postTitle">
-        <label>Post</label>
-        <textarea class="form-control" name="postBody" rows="5" cols="30"></textarea>
-      </div>
-      <button class="btn btn-primary" type="submit" name="button">Publish</button>
-    </form>
+<div class="container mt-5 umc">
+  <form class="form-signin" method="post" action="/compose">
+    <h1 class="h3 mb-3 font-weight-normal">Compose</h1>
+    <label for="inputEmail" class="sr-only">Title</label>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Title"
+      required="true"
+      autofocus="true"
+      name="title"
+    />
+    <p type="hidden"></p>
+    <label for="inputPassword" class="sr-only">Content</label>
+    <textarea
+      type="text"
+      class="form-control"
+      placeholder="Content"
+      required="true"
+      name="content"
+      rows="15"
+    >
+    </textarea>
+    <p type="hidden"></p>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">
+      Submit
+    </button>
+  </form>
+</div>
 
 <%- include("partials/footer"); -%>

@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5 um">
+  <h1>Login</h1>
+  <form class="form-signin" action="/login" method="post">
+    <label for="inputEmail" class="sr-only">Email address</label>
+    <input
+      type="email"
+      id="inputEmail"
+      class="form-control"
+      placeholder="Email address"
+      required="true"
+      autofocus="true"
+      autocomplete="on"
+      name="username"
+    />
+    <p type="hidden"></p>
+    <label for="inputPassword" class="sr-only">Password</label>
+    <input
+      type="password"
+      id="inputPassword"
+      class="form-control"
+      placeholder="Password"
+      required="true"
+      name="password"
+    />
+    <div class="checkbox mb-3">
+      <label> <input type="checkbox" value="remember-me" /> Remember me </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">
+      Sign in
+    </button>
+  </form>
+</div>
+
+<%- include('partials/footer') %> <%- include('partials/footer') %>

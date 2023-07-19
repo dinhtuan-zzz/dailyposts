@@ -1,16 +1,27 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
 const app = express();
 
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(
+  session({
+    secret: "Session sercet",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 const connectDatabase = async () => {
   try {
     mongoose.connect(
@@ -34,11 +45,25 @@ const postSchema = {
   title: String,
   content: String,
 };
+
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+});
+
+userSchema.plugin(passportLocalMongoose);
+
 const Post = mongoose.model("Post", postSchema);
+const User = mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 async function findHomeContent() {
   return await Post.find({});
 }
+
 app.get("/", function (req, res) {
   findHomeContent()
     .then(function (foundPosts) {
@@ -60,8 +85,69 @@ app.get("/contact", function (req, res) {
   res.render("contact", { contactContent: contactContent });
 });
 
+app.get("/login", function (req, res) {
+  res.render("login");
+});
+
+app.post("/login", async (req, res) => {
+  const newUser = new User({
+    username: req.body.username,
+    password: req.body.password,
+  });
+  try {
+    req.login(newUser, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        passport.authenticate("local")(req, res, function () {
+          res.redirect("/compose");
+        });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.get("/register", function (req, res) {
+  res.render("register");
+});
+
+app.post("/register", async (req, res) => {
+  try {
+    User.register(
+      { username: req.body.username },
+      req.body.password,
+      function (err, user) {
+        if (err) {
+          console.log(err);
+        } else {
+          passport.authenticate("local")(req, res, function () {
+            res.redirect("/compose");
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.log(err);
+  }
+});
+
+app.get("/logout", function (req, res) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+
 app.get("/compose", function (req, res) {
-  res.render("compose");
+  if (req.isAuthenticated()) {
+    res.render("compose");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.post("/compose", function (req, res) {
