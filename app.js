@@ -86,7 +86,13 @@ app.get("/contact", function (req, res) {
 });
 
 app.get("/login", function (req, res) {
-  res.render("login");
+  res.render("login", { error: req.session.messages });
+  req.session.messages = undefined;
+  req.session.save((err) => {
+    if (err) {
+      throw err;
+    }
+  });
 });
 
 app.post("/login", async (req, res) => {
@@ -97,9 +103,12 @@ app.post("/login", async (req, res) => {
   try {
     req.login(newUser, function (err) {
       if (err) {
-        console.log(err);
+        return next(err);
       } else {
-        passport.authenticate("local")(req, res, function () {
+        passport.authenticate("local", {
+          failureRedirect: "/login",
+          failureMessage: "Invalid usename or password",
+        })(req, res, function () {
           res.redirect("/compose");
         });
       }
@@ -110,7 +119,7 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/register", function (req, res) {
-  res.render("register");
+  res.render("register", { error: null });
 });
 
 app.post("/register", async (req, res) => {
@@ -121,6 +130,7 @@ app.post("/register", async (req, res) => {
       function (err, user) {
         if (err) {
           console.log(err);
+          res.render("register", { error: err });
         } else {
           passport.authenticate("local")(req, res, function () {
             res.redirect("/compose");
@@ -152,8 +162,8 @@ app.get("/compose", function (req, res) {
 
 app.post("/compose", function (req, res) {
   const post = new Post({
-    title: req.body.postTitle,
-    content: req.body.postBody,
+    title: req.body.title,
+    content: req.body.content,
   });
   post.save();
   res.redirect("/");
